@@ -13,11 +13,12 @@ pip install -r requirements.txt
 
 ## Run Demo
 
-Run this command:
+To run inference on an image Run this command:
+
 ```
 python detect_image.py --source ./input/cars1.jpg
 ```
-result image saves in `/output` dir. 
+downloading models automatically from the latest YOLOv5 release and result image saves in `/output` dir. 
 
 
 Note that you can pass some other arguments. Take a look at `detect_image.py` file.
