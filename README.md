@@ -18,7 +18,16 @@ To run inference on an image Run this command:
 ```
 python detect_image.py --source ./input/cars1.jpg
 ```
-downloading models automatically from the latest YOLOv5 release and result image saves in `/output` dir. 
-
 
 Note that you can pass some other arguments. Take a look at `detect_image.py` file.
+
+
+To run inference on an video Run this command:
+
+```
+python detect_video.py --source ./input/fruits.mp4
+```
+
+Note that you can pass some other arguments. Take a look at `detect_video.py` file.
+
+downloading models automatically from the latest YOLOv5 release and result image saves in `/output` dir. 
