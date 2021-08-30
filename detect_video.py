@@ -2,6 +2,7 @@ import argparse
 import time
 from pathlib import Path
 import os
+
 import numpy as np
 import cv2
 import torch
@@ -15,26 +16,26 @@ from utils.torch_utils import select_device
 
 
 def detect(opt):
-
     source, weights, view_img, imgsz = opt.source, opt.weights, opt.view_img, opt.img_size
     save_dir = 'output'
     file_name = Path(source).name
 
-    cap = cv2.VideoCapture(source)
-    frame_width = int(cap.get(3))
-    frame_height = int(cap.get(4))
-    writer = cv2.VideoWriter('Out.avi', cv2.VideoWriter_fourcc(*'MJPG'), 10, (frame_width, frame_height))
+    video=cv2.VideoCapture(source)
+    f_width = int(video.get(3))
+    f_height = int(video.get(4))
+    out = cv2.VideoWriter('out.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10, (f_width, f_height))
     while True:
-        res,frame=cap.read()
-        if not res:
+        ret,frame=video.read()
+        if not ret:
             break
+
         # Load model
         device = select_device(opt.device)
         model = attempt_load(weights, map_location=device)  # load FP32 model
         stride = int(model.stride.max())  # model stride
         imgsz = check_img_size(imgsz, s=stride)  # check img_size
         names = model.module.names if hasattr(model, 'module') else model.names  # get class names
-
+  
         if device.type != 'cpu':
             model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
 
@@ -43,7 +44,7 @@ def detect(opt):
         original_image = img.copy()
 
         t0 = time.time()
-
+    
         # img = cv2.resize(img, (416, 416))
         img = letterbox(img)[0]
         img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
@@ -71,23 +72,23 @@ def detect(opt):
                     c = int(cls)  # integer class
                     label = (names[c] if opt.hide_conf else f'{names[c]} {conf:.2f}')
                     plot_one_box(xyxy, original_image, label=label, color=colors(c, True), line_thickness=2)
-
-        if view_img:
-            cv2.imshow("result", original_image)
-            cv2.waitKey(1)  # 1 millisecond
-
-        # Save results (image with detections)
-        # cv2.imwrite(save_path, original_image)
-        writer.write(original_image)
-        writer.release()
-
+                    
+        # if view_img:
+        # original_image=cv2.resize(original_image,(original_image.shape[0]//2,original_image.shape[1]//3))
+        cv2.imshow("result", original_image)
+        out.write(original_image)
+        cv2.waitKey(1)  # 1 millisecond
+    out.release()
+    # Save results (image with detections)
+    # cv2.imwrite(save_path, original_image)
+    
     print(f'Done. ({time.time() - t0:.3f}s)')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default='weights/yolov5m.pt', help='model.pt path(s)')
-    parser.add_argument('--source', type=str, default='input/frs.jpg', help='source')  # file/folder, 0 for webcam
+    parser.add_argument('--source', type=str, default='input/fruits.mp4', help='source')  # file/folder, 0 for webcam
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.25, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='IOU threshold for NMS')
